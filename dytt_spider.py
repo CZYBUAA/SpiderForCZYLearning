@@ -35,20 +35,20 @@ def getUrls(start,end):
 
 def getMovieDetails(text):
     information_html=etree.HTML(text)
-    result=information_html.xpath("//div[@id='Zoom']//p")[0]
+    result_list=information_html.xpath("//div[@id='Zoom']//p")
+    result=[]
+    if result_list!=[]:               #有一些详情页故意不用p标签包含，造成该数组为空，于是产生错误中断程序，需要做一些处理，必要时做一些断点记录
+        result=result_list[0]
     return result
 
 #获取1到7页，不包含第7页的所有电影详情url
 result_urls=getUrls(1,7)
-
-
 for item in result_urls:
-    detail_url = result_urls[0]
+    detail_url = item
     text = getText(detail_url)
-    print(etree.tostring(getMovieDetails(text),encoding='utf-8').decode())
+    detail=getMovieDetails(text)
+    if detail!=[]:
+        print(etree.tostring(detail,encoding='utf-8').decode())
+        print(detail.xpath(".//text()"))
     print("-------------------------------------------------------------------")
-
-
-#detail_url = result_urls[0]
-#text = getText(detail_url)
-#print(etree.tostring(getMovieDetails(text),encoding='utf-8').decode())
+    break
