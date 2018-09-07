@@ -33,26 +33,22 @@ def getUrls(start,end):
         urls.extend(getDetailUrl(dytt_text))
     return urls
 
+def getMovieDetails(text):
+    information_html=etree.HTML(text)
+    result=information_html.xpath("//div[@id='Zoom']//p")[0]
+    return result
+
 #获取1到7页，不包含第7页的所有电影详情url
 result_urls=getUrls(1,7)
-#先试验，尝试获取第一个url对应电影的详情信息片段
-detail_url = result_urls[0]
-text=getText(detail_url)
-print(text) #注意，这里能够无乱码输出是因为第十行用了gbk作为解码，但是实际resp对应的encoding方式应该是ISO-8859-1，疑问在这
 
 
-
-#for detail_url in result_urls:
-#    resp = requests.get(detail_url, headers=header, timeout=50000)
-#    print(resp.content.decode('gbk'))
-
-#这里编码格式明明是ISO-8859-1，为什么用这个解码在控制台会输出乱码，但是用gbk解码就不会出现乱码？
-#print(resp.encoding)
-#print(resp.content.decode('gbk'))
+for item in result_urls:
+    detail_url = result_urls[0]
+    text = getText(detail_url)
+    print(etree.tostring(getMovieDetails(text),encoding='utf-8').decode())
+    print("-------------------------------------------------------------------")
 
 
-#同样的问题
-#print(text.encode('ISO-8859-1').decode('gbk'))
-#detail_imformation_HTML=etree.HTML(text)
-#list_p=detail_imformation_HTML.xpath("//p")
-#print(etree.tostring(list_p[4],encoding='ISO-8859-1').decode('gbk'))
+#detail_url = result_urls[0]
+#text = getText(detail_url)
+#print(etree.tostring(getMovieDetails(text),encoding='utf-8').decode())
