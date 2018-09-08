@@ -1,6 +1,12 @@
 import requests
 from lxml import etree
 
+# 1、获取列表页数的所有电影的详情页url，组成一个数组
+# 2、遍历这个数组，访问数组中的每个url对应的详情页面
+# 3、返回详情页面中的HTML文本，用xpath语言获取包含关键信息的段落
+# 4、解析这个段落，将这个段落文本的信息拆解，放入一个“字典”{}，解析完一个电影，就把这个代表这个电影的“字典”放入movie数组中，返回给主函数
+# 5、输出这个包含所有电影“字典”信息的数组movie
+
 #获取对应url的响应页面信息，并返回起HTML文本
 def getText(url):
     header = {
@@ -33,6 +39,7 @@ def getUrls(start,end):
         urls.extend(getDetailUrl(dytt_text))
     return urls
 
+#获取详情页中，仅包含关键信息的段落
 def getMovieDetails(text):
     information_html=etree.HTML(text)
     result_list=information_html.xpath("//div[@id='Zoom']//p")
@@ -41,14 +48,49 @@ def getMovieDetails(text):
         result=result_list[0]
     return result
 
-#获取1到7页，不包含第7页的所有电影详情url
-result_urls=getUrls(1,7)
-for item in result_urls:
-    detail_url = item
-    text = getText(detail_url)
-    detail=getMovieDetails(text)
-    if detail!=[]:
-        print(etree.tostring(detail,encoding='utf-8').decode())
-        print(detail.xpath(".//text()"))
-    print("-------------------------------------------------------------------")
-    break
+def parse_info(info,rule):
+    return info.replace(rule,"").strip()
+
+def getContents(result_urls):
+    movies = []
+    #遍历result_urls列表中的所有项，即每一个电影对应的详情页url
+    for item in result_urls:
+        detail_url = item
+        text = getText(detail_url)
+        detail=getMovieDetails(text)
+        movie = {}
+        if detail!=[]:
+            info=detail.xpath(".//text()")
+            for info_item in info:
+                if info_item.startswith("◎译　　名"):
+                    info_item = parse_info(info_item, "◎译　　名")
+                    movie['translate film name'] = info_item
+                elif info_item.startswith("◎片　　名"):
+                    info_item = parse_info(info_item, "◎片　　名")
+                    movie['film name'] = info_item
+                elif info_item.startswith("◎年　　代"):
+                    info_item = parse_info(info_item, "◎年　　代")
+                    movie['year'] = info_item
+                elif info_item.startswith("◎产　　地"):
+                    info_item = parse_info(info_item, "◎产　　地")
+                    movie['country'] = info_item
+                elif info_item.startswith("◎类　　别"):
+                    info_item = parse_info(info_item, "◎类　　别")
+                    movie['category'] = info_item
+                elif info_item.startswith("◎豆瓣评分"):
+                    info_item = parse_info(info_item, "◎豆瓣评分")
+                    movie['douban_rating'] = info_item
+                elif info_item.startswith("◎片　　长"):
+                    info_item = parse_info(info_item, "◎片　　长")
+                    movie['duration'] = info_item
+                elif info_item.startswith("◎导　　演"):
+                    info_item = parse_info(info_item, "◎导　　演")
+                    movie['director'] = info_item
+        movies.append(movie)
+    return movies
+
+#获取1到2页，不包含第2页的所有电影详情url，获取7页的时候有bug，还没处理
+result_urls=getUrls(1,2)
+movies=getContents(result_urls)
+print(movies)
+
