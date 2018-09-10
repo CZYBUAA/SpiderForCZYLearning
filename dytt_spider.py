@@ -7,7 +7,7 @@ from lxml import etree
 # 4、解析这个段落，将这个段落文本的信息拆解，放入一个“字典”{}，解析完一个电影，就把这个代表这个电影的“字典”放入movie数组中，返回给主函数
 # 5、输出这个包含所有电影“字典”信息的数组movie
 
-#获取对应url的响应页面信息，并返回起HTML文本
+#获取对应url的响应页面信息，并返回HTML文本
 def getText(url):
     header = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0',
@@ -16,8 +16,8 @@ def getText(url):
         'Accept-Language':'zh - CN, zh;q = 0.8, zh - TW;q = 0.7, zh - HK;q = 0.5, en - US;q = 0.3, en;q = 0.2',
         'Host':'www.dytt8.net'
     }
-    resp = requests.get(url,headers=header,timeout=50000)                                                 #这里输出的响应页面的编码格式是ISO-8859-1
-    text = resp.content.decode(encoding="gbk", errors="ignore")             #但是这里只有用gbk解码，控制台输出才不会乱码，反而用ISO-8859-1解码就会乱码
+    resp = requests.get(url,headers=header,timeout=50000)                   
+    text = resp.content.decode(encoding="gbk", errors="ignore")             #从网页上看，网页是用gbk编码的，而不是resp.encoding说的ISO
     return text
 
 #获取列表页的HTML文本，并用lxml获取该页中列表内的所有电影详情url
@@ -45,7 +45,11 @@ def getUrls(start,end):
         urls.extend(getDetailUrl(dytt_text))
     return urls
 
-#获取详情页中，仅包含关键信息的段落
+#删除字符串中不必要的信息并用空格替换
+def parse_info(info,rule):
+    return info.replace(rule,"").strip()
+
+#获取详情页中，仅包含关键信息的div，并且对获取的信息进行抽取和清洗
 def getMovieDetails(text):
     information_html=etree.HTML(text)
     result_list=information_html.xpath("//div[@id='Zoom']")
@@ -80,9 +84,7 @@ def getMovieDetails(text):
                 movie['director'] = info_item
     return movie
 
-def parse_info(info,rule):
-    return info.replace(rule,"").strip()
-
+#将所有电影的“字典”以数组的形式保存，并返回给调用的主函数
 def getContents(result_urls):
     movies = []
     #遍历result_urls列表中的所有项，即每一个电影对应的详情页url
@@ -95,7 +97,7 @@ def getContents(result_urls):
         movies.append(movie)
     return movies
 
-#获取1到2页，不包含第2页的所有电影详情url，获取7页的时候有bug，还没处理
+#获取1到2页，不包含第7页的所有电影详情url
 result_urls=getUrls(1,7)
 movies=getContents(result_urls)
 print(movies)
