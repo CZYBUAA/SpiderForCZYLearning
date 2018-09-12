@@ -82,16 +82,3 @@ df.to_excel('222.xlsx')
 print('--------------------end--------------------')
 
 
-#调试使用
-'''
-print(len(allResult))
-for i in allResult:
-    if len(i)!=0:
-        print(i['title'])
-        print(i['date'])
-        print(i['source'])
-        print(i['article'])
-        print(i['editor'])
-        print(i['commentsNumber'])
-        print('-----------------------------------------------')
-'''

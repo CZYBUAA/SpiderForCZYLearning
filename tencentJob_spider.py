@@ -1,6 +1,7 @@
 import requests
 from lxml import etree
 
+#获取页面的HTML文本，并返回
 def getResponseText(url):
     header = {
         'Cookie': 'pgv_pvi=8770966528; PHPSESSID=681omihjt3pdsldkvk0kgpap75; pgv_si=s1532389376',
@@ -12,6 +13,7 @@ def getResponseText(url):
     text = resp.text
     return text
 
+#传入职业列表每一页的HTML文本，获取这个文本的列表中职位对应的详情url
 def getUrlsPerPage(text):
     list_page_HTML = etree.HTML(text)
     result = list_page_HTML.xpath("//tr[@class='even']//a/@href | //tr[@class='odd']//a/@href")
@@ -21,6 +23,8 @@ def getUrlsPerPage(text):
         url_per_page.append(real_url)
     return url_per_page
 
+#逐个访问传入的url数组中的元素，并抽取关键信息，一个职位的信息用一个position字典包含，
+# 并用一个positions的数组包含该页展示的所有职位，返回这个数组
 def getInfoPerPage(urls):
     positions=[]
     for url in urls:
@@ -57,14 +61,23 @@ def getInfoPerPage(urls):
         positions.append(position)
     return positions
 
+#主函数，主要包括如下步骤：
+#1、获取职位列表展示页面（for循环提供指定页面遍历功能）
+#2、获取当前页面的职位列表中的职位详情url，以数组封装
+#3、遍历访问详情url数组，获取某一页列表中所展示的职位的所有详细信息，并以数组形式表示“该页的所有职位信息”
+#4、最后以数组封装每一页的职位信息的数组
 base_url='https://hr.tencent.com/position.php?&start={}#a'
 positions=[]
 for x in range(0,2):
     x *= 10
     url = base_url.format(x)
+    #第1步
     list_page_text=getResponseText(url)
+    #第2步
     url_per_page=getUrlsPerPage(list_page_text)
+    #第3步
     positions_per_page=getInfoPerPage(url_per_page)
+    #第4步
     positions.append(positions_per_page)
 
 print(positions)
