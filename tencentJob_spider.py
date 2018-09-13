@@ -4,6 +4,34 @@ import pandas
 import openpyxl
 
 #获取页面的HTML文本，并返回
+
+def checkInfoArray(array):
+    if len(array)==3:
+        print("若有报错再处理3")
+        return
+
+    if len(array)==4:
+        print("若有报错再处理4")
+        return
+
+    if len(array)==5:
+        result_array=[0]*6
+        print(array[2])
+        if array[2]=='职位类别：':
+            for i in range(0,3):
+                result_array[i]=array[i]
+            if array[3]=='招聘人数：':
+                result_array[3]=''
+                result_array[4]=array[3]
+                result_array[5]=array[4]
+        else:
+            result_array[0] = array[0]
+            result_array[1] = ''
+            for i in range(1,5):
+                result_array[i+1] = array[i]
+        return result_array
+
+
 def getResponseText(url):
     header = {
         'Cookie': 'pgv_pvi=8770966528; PHPSESSID=681omihjt3pdsldkvk0kgpap75; pgv_si=s1532389376',
@@ -37,6 +65,8 @@ def getInfoPerPage(urls):
         position['position_name'] = position_name
         #获取职位城市、分类、人数
         position_fundamental_info = model.xpath(".//tr[@class='c bottomline']//td//text()")
+        if len(position_fundamental_info)<6:
+            position_fundamental_info=checkInfoArray(position_fundamental_info)
         position_place = position_fundamental_info[1]
         position_category = position_fundamental_info[3]
         position_number = position_fundamental_info[5]
@@ -70,7 +100,7 @@ def getInfoPerPage(urls):
 base_url='https://hr.tencent.com/position.php?&start={}#a'
 base_inform='开始获取第{}页职位列表'
 positions=[]
-for x in range(0,2):
+for x in range(10,15):
     inform = base_inform.format(x)
     x *= 10
     url = base_url.format(x)
