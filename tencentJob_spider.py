@@ -1,5 +1,7 @@
 import requests
 from lxml import etree
+import pandas
+import openpyxl
 
 #获取页面的HTML文本，并返回
 def getResponseText(url):
@@ -24,9 +26,8 @@ def getUrlsPerPage(text):
     return url_per_page
 
 #逐个访问传入的url数组中的元素，并抽取关键信息，一个职位的信息用一个position字典包含，
-# 并用一个positions的数组包含该页展示的所有职位，返回这个数组
+#直接用positions数组追加这个职位信息的字典即可
 def getInfoPerPage(urls):
-    positions=[]
     for url in urls:
         info_text=getResponseText(url)
         model = etree.HTML(info_text)
@@ -59,26 +60,29 @@ def getInfoPerPage(urls):
         position['position_duty'] = position_duty
         position['position_demand'] = position_demand
         positions.append(position)
-    return positions
+        print(position)
+    return
 
 #主函数，主要包括如下步骤：
 #1、获取职位列表展示页面（for循环提供指定页面遍历功能）
 #2、获取当前页面的职位列表中的职位详情url，以数组封装
 #3、遍历访问详情url数组，获取某一页列表中所展示的职位的所有详细信息，并以数组形式表示“该页的所有职位信息”
-#4、最后以数组封装每一页的职位信息的数组
 base_url='https://hr.tencent.com/position.php?&start={}#a'
+base_inform='开始获取第{}页职位列表'
 positions=[]
 for x in range(0,2):
+    inform = base_inform.format(x)
     x *= 10
     url = base_url.format(x)
+    print(inform)
     #第1步
     list_page_text=getResponseText(url)
     #第2步
     url_per_page=getUrlsPerPage(list_page_text)
     #第3步
     positions_per_page=getInfoPerPage(url_per_page)
-    #第4步
-    positions.append(positions_per_page)
 
-print(positions)
-
+#将这个数组存入excel表中，不过目前这种方式有一个缺陷，
+# 一旦某一页的网络断开连接，之前所有爬取的信息会随着程序中断而丢失
+df = pandas.DataFrame(positions)
+df.to_excel('temp.xlsx')
