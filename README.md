@@ -22,3 +22,10 @@
 介绍：Tencent招聘网页上的信息获取，基本功能已经实现
 
 网址：https://hr.tencent.com/position.php?&start=0#a
+
+
+四、weatherChina
+
+介绍：获取中国天气网中，全国城市地区一天的最低气温，并做排序。还未实现可视化
+
+网址：http://www.weather.com.cn/textFC/hb.shtml
