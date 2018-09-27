@@ -100,7 +100,7 @@ def getInfoPerPage(urls):
 base_url='https://hr.tencent.com/position.php?&start={}#a'
 base_inform='开始获取第{}页职位列表'
 positions=[]
-for x in range(10,15):
+for x in range(1,330):
     inform = base_inform.format(x)
     x *= 10
     url = base_url.format(x)
